@@ -1,14 +1,11 @@
 
 import Link from 'next/link'
-import { cookies } from 'next/headers'
-import { readState, writeState } from '@/lib/state'
+import { readState } from '@/lib/state'
 import { now } from '@/lib/game'
 
 export default function Home() {
   const s = readState()
-  // write back state after accrue
-  writeState(s)
-  const cd = Math.max(0, s.cooldownUntil - now())
+    const cd = Math.max(0, s.cooldownUntil - now())
 
   return (
     <div className="space-y-6">
