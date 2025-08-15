@@ -40,7 +40,7 @@ export function CirclePerfect({ onDone }: { onDone: (hit: boolean) => void }) {
     let inZone = false
     if (zoneSize <= 0) inZone = false
     else if (e >= s) inZone = a >= s && a <= e
-    else inZone = a >= s or a <= e
+    else inZone = a >= s || a <= e
     if (inZone) onDone(true)
     else if (attempt === 1) resetForAttempt(2)
     else onDone(false)

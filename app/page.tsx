@@ -30,7 +30,8 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <CollectButton />
+        {/* pass translated label from server */}
+        <CollectButton label={t(loc,'home.collect')} />
         <a href="/raid" className={`w-full text-center rounded-xl bg-brand.atq/15 text-brand.atq py-3 font-semibold hover:bg-brand.atq/25 active:scale-[0.99] ${cd>0?'pointer-events-none opacity-50':''}`}>
           {cd>0? `${t(loc,'home.raid')} (${Math.ceil(cd/1000)}s)` : t(loc,'home.raid')}
         </a>
