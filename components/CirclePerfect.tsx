@@ -32,7 +32,6 @@ export function CirclePerfect({ onDone }: { onDone: (hit: boolean) => void }) {
   useEffect(() => { resetForAttempt(1) }, [])
 
   function handleTap() {
-    // normalize and handle wrap-around zone
     const two = Math.PI*2
     const s = ((zoneStart % two) + two) % two
     const e = ((zoneStart + zoneSize) % two + two) % two

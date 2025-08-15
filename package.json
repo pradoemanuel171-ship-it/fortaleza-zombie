@@ -1,5 +1,5 @@
 {
-  "name": "fortaleza",
+  "name": "fortaleza-clean-v1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,13 +10,9 @@
     "next": "14.2.4",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "zustand": "4.5.2",
-    "framer-motion": "11.2.6",
-    "lucide-react": "0.441.0",
-    "clsx": "2.1.1",
     "@worldcoin/minikit-js": "1.9.6",
     "jsonwebtoken": "9.0.2",
-    "@vercel/postgres": "0.8.0"
+    "clsx": "2.1.1"
   },
   "devDependencies": {
     "autoprefixer": "10.4.19",

@@ -1,10 +1,12 @@
 {
+  "app.blocked": "Open this miniapp from World App to play.",
+  "app.retry": "Retry",
   "home.title": "Your Base",
-  "home.demo": "Demo without DB",
   "home.obrix": "Your Obrix",
   "home.collect": "Collect",
   "home.raid": "Raid",
-  "home.rules": "Demo rules: attack costs 1.5% of your Obrix (min 25, max 250). Loot on win = 5% of target.",
+  "home.demo": "Demo without DB",
+  "home.rules": "Attack costs 1.5% of your Obrix (min 25, max 250). Loot on win = 5% of target.",
   "raid.title": "Raid",
   "raid.finding": "Finding target\u2026",
   "raid.target": "Target",
@@ -17,8 +19,5 @@
   "raid.deploy_failed": "Deployment failed: you used all 3 changes. Cost was consumed and cooldown started.",
   "circle.tip": "Tap when the marker passes the green zone",
   "circle.attempt": "Attempt {n} of 2",
-  "circle.hit": "Strike now!",
-  "result.back": "Back",
-  "error.cooldown": "In cooldown {s}s",
-  "error.nofunds": "Not enough Obrix to attack."
+  "circle.hit": "Strike now!"
 }

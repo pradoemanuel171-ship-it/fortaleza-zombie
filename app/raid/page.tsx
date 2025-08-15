@@ -1,3 +1,4 @@
+
 import RaidClient from '@/components/RaidClient'
 import { detectLocale } from '@/lib/i18n'
 

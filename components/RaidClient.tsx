@@ -1,32 +1,39 @@
-'use client'
-import { useEffect, useState } from 'react'
-import { CirclePerfect } from '@/components/CirclePerfect'
-import { tClient, Locale } from '@/lib/i18n/client'
 
-function getCsrf(){ return (document.cookie.split('; ').find(c=>c.startsWith('fx_csrf='))||'').split('=')[1] || '' }
+'use client'
+import { useEffect, useState, useCallback } from 'react'
+import EnvGate from '@/components/EnvGate'
+import AutoLogin from '@/components/AutoLogin'
+import { CirclePerfect } from '@/components/CirclePerfect'
+import { tClient, Locale } from '@/lib/clientI18n'
 
 type Rival = { id: string, name: string, level: number, obrixEstimate: number, hint: string, isBot: boolean }
 type LoadState = 'idle'|'loading'|'ready'|'attacking'|'result'
 
 export default function RaidClient({ loc }: { loc: Locale }) {
+  const [allowed, setAllowed] = useState(false)
   const [state, setState] = useState<LoadState>('idle')
   const [rival, setRival] = useState<Rival|null>(null)
   const [skips, setSkips] = useState(0)
-  const [message, setMessage] = useState<string>('')
+  const [message, setMessage] = useState('')
+
+  const onGateReady = useCallback(()=>{
+    setAllowed(true)
+  },[])
 
   async function startOrNext(skip=false) {
     setState('loading')
-    const res = await fetch(skip?'/api/skip':'/api/rival', { method:'POST', headers: { 'x-csrf': getCsrf() } })
+    const res = await fetch(skip?'/api/skip':'/api/rival', { method:'POST' })
     const data = await res.json()
     if (!res.ok) { setMessage(data.error || 'Error'); setState('result'); return }
     if (data.done) { setMessage(tClient(loc,'raid.deploy_failed')); setState('result'); return }
     setRival(data.rival); setSkips(data.skips); setState('ready')
   }
-  useEffect(()=>{ startOrNext(false) }, [])
+
+  useEffect(()=>{ if (allowed) startOrNext(false) }, [allowed])
 
   async function onAttackResult(hit: boolean) {
     setState('attacking')
-    const res = await fetch('/api/attack', { method:'POST', headers:{ 'Content-Type':'application/json','x-csrf':getCsrf() }, body: JSON.stringify({ targetId: rival?.id, result: hit? 'hit':'miss' }) })
+    const res = await fetch('/api/attack', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ targetId: rival?.id, result: hit? 'hit':'miss' }) })
     const data = await res.json()
     if (!res.ok) setMessage(data.error || 'Error')
     else setMessage(data.msg)
@@ -35,6 +42,9 @@ export default function RaidClient({ loc }: { loc: Locale }) {
 
   return (
     <div className="space-y-4">
+      <EnvGate onReady={onGateReady} />
+      <AutoLogin />
+
       <h1 className="text-xl font-semibold">{tClient(loc,'raid.title')}</h1>
 
       {state==='loading' && <div className="rounded-2xl bg-surface p-4">{tClient(loc,'raid.finding')}</div>}
