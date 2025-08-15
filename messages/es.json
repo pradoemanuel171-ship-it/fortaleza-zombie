@@ -1,0 +1,23 @@
+{
+  "app.blocked": "Abr\u00ed esta miniapp desde World App para jugar.",
+  "app.retry": "Reintentar",
+  "home.title": "Tu Base",
+  "home.obrix": "Tus Obrix",
+  "home.collect": "Recolectar",
+  "home.raid": "Saqueo",
+  "home.demo": "Demo sin DB",
+  "home.rules": "Ataque cuesta 1.5% de tus Obrix (min 25, m\u00e1x 250). Bot\u00edn por victoria = 5% del objetivo.",
+  "raid.title": "Saqueo",
+  "raid.finding": "Buscando objetivo\u2026",
+  "raid.target": "Objetivo",
+  "raid.level": "Nivel",
+  "raid.estimate": "Obrix estimado: ~{n}",
+  "raid.hint": "Pista: {hint}",
+  "raid.skips": "Skips: {used}/3",
+  "raid.skip": "Prefiero otro",
+  "raid.attack": "Atacar",
+  "raid.deploy_failed": "Despliegue fallido: agotaste los 3 cambios. Se consumi\u00f3 el costo y empez\u00f3 el cooldown.",
+  "circle.tip": "Toca cuando el marcador pase por la zona verde",
+  "circle.attempt": "Intento {n} de 2",
+  "circle.hit": "\u00a1Golpear ahora!"
+}
