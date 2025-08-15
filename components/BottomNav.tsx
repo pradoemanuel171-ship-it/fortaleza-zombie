@@ -23,9 +23,7 @@ export function BottomNav() {
             return (
               <li key={href} className="relative">
                 <Link href={href} className="flex flex-col items-center gap-1 py-3 text-sm">
-                  <div className={active ? 'text-brand.obrix' : 'text-muted'}>
-                    <Icon size={22} />
-                  </div>
+                  <div className={active ? 'text-brand.obrix' : 'text-muted'}><Icon size={22} /></div>
                   <span className={active ? 'text-brand.obrix' : 'text-muted'}>{label}</span>
                 </Link>
                 {active && <div className="absolute inset-x-6 -bottom-1 h-1 rounded-full bg-brand.obrix/60" />}

@@ -1,12 +1,11 @@
-export const runtime = 'nodejs'
 
+export const runtime = 'nodejs'
 import { NextResponse } from 'next/server'
 import { readState, writeState } from '@/lib/state'
-
+import { requireSession, requireCsrf } from '@/lib/security'
 export async function POST() {
+  requireCsrf(); requireSession()
   const s = readState()
-  // In this demo, production is already accrued on read.
-  // We'll just echo state back.
   writeState(s)
-  return NextResponse.json({ ok: true, obrix: s.obrix })
+  return NextResponse.json({ ok:true, obrix: s.obrix })
 }

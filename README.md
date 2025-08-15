@@ -1,36 +1,18 @@
 
-# Fortaleza — Demo sin DB (World App WebView Ready)
+# Fortaleza — Mini App demo (World App WebView ready)
 
-**Qué incluye**
-- Next.js 14 + App Router + TypeScript
-- TailwindCSS (estilo oscuro minimalista)
-- Barra inferior con pestañas activas (resaltado)
-- Flujo de Saqueo:
-  - Coste dinámico (1.5% de tus Obrix; min 25, máx 250)
-  - Rival 100% aleatorio (bots simulados)
-  - 3 skips; si los agotas, pierdes el coste y empieza cooldown
-  - Minijuego "Círculo Perfecto" con 2 oportunidades (hit/miss)
-  - Cooldown global 5 min tras atacar; 30 min contra mismo objetivo (simulable luego)
-- API stateless (sin base de datos): estado firmado en cookie HTTP-only
-- Listo para Vercel (funciona en WebView de World App)
+Incluye:
+- Next.js 14, Tailwind, TypeScript
+- Autologin con World App (MiniKit) + SIWE server-side
+- Seguridad: JWT de sesión httpOnly, CSRF, runtime Node.js en API
+- i18n ES/EN (autodetección + selector)
+- Flujo de saqueo: coste 1.5%, 3 skips, círculo (2 chances), cooldown 5 min, bots
+- Sin DB (estado firmado en cookie). Luego se migra a Postgres.
 
-## Variables de entorno (opcional)
-- `APP_SECRET` — secret para firmar el estado (si no, usa uno dev).
-- `NEXT_PUBLIC_WLD_APP_ID` — tu APP_ID de Worldcoin (para checks/telemetría futura).
+## Env vars (Vercel)
+- NEXT_PUBLIC_WLD_APP_ID=app_0b2177978f881d03251605b2f6dde563
+- APP_SECRET=F0rTaLeZa_2025_OBRIX!x7Rj9QkV2pLm
 
 ## Scripts
-```bash
 npm i
 npm run dev
-```
-Abre http://localhost:3000
-
-## Endpoints
-- `GET /api/status` — estado actual.
-- `POST /api/collect` — recolectar producción (ya se acumula en cada request).
-- `POST /api/rival` — inicia un saqueo (cobra coste) y devuelve objetivo.
-- `POST /api/skip` — consume un skip; al 3º finaliza como fallo y empieza cooldown.
-- `POST /api/attack` — resuelve con resultado `hit|miss` (desde el círculo).
-
-## Nota
-Esto es **demo de pruebas**: no guarda datos persistentes y todos los rivales son bots simulados.
