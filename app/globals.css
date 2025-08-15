@@ -1,0 +1,20 @@
+
+@tailwind base; @tailwind components; @tailwind utilities;
+:root { color-scheme: dark }
+html, body { height: 100% }
+body { background: theme('colors.bg'); color: theme('colors.text') }
+* { -webkit-tap-highlight-color: transparent }
+:focus-visible { outline: 2px solid #10A37F; outline-offset: 2px }
+
+/* ANIMATIONS */
+@keyframes fade-in { from {opacity: 0} to {opacity: 1} }
+@keyframes slide-up { from {transform: translateY(12px); opacity: 0} to {transform: translateY(0); opacity: 1} }
+@keyframes pop { 0% { transform: scale(.96); opacity:.0 } 60% { transform: scale(1.02); opacity:1 } 100% { transform: scale(1) } }
+@keyframes pulse-soft { 0%,100% { box-shadow: 0 0 0 0 rgba(16,163,127,.25) } 50% { box-shadow: 0 0 0 12px rgba(16,163,127,0) } }
+@keyframes shake { 0%,100% { transform: translateX(0) } 25% { transform: translateX(-4px) } 75% { transform: translateX(4px) } }
+.anim-fade { animation: fade-in .4s ease-out both }
+.anim-slide-up { animation: slide-up .45s ease-out both }
+.anim-pop { animation: pop .35s ease-out both }
+.anim-pulse-soft { animation: pulse-soft 1.6s ease-out infinite }
+.anim-shake { animation: shake .28s ease-in-out 1 }
+.transition-soft { transition: all .25s ease }
