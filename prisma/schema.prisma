@@ -71,7 +71,12 @@ model EconomyState {
 }
 
 enum PaymentKind   { BASE_PURCHASE STORE_PACK STORE_BOOST PAYOUT }
-enum PaymentStatus { pending confirmed failed }
+// Después (OK)
+enum PaymentStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+}
 
 model Payment {
   id          String        @id @default(uuid())
