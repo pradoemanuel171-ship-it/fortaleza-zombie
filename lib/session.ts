@@ -1,24 +1,44 @@
+// lib/session.ts
 import { cookies } from 'next/headers'
-import jwt from 'jsonwebtoken'
-const SID = 'fx_sid'
-function secret(){ return process.env.APP_SECRET || 'dev' }
-export type Session = { uid: string, addr: string, exp: number }
-export function setSession(uid: string, addr: string){
-  const exp = Math.floor(Date.now()/1000) + 60*60*24*7
-  const token = jwt.sign({ uid, addr, exp } as Session, secret())
-  cookies().set(SID, token, { httpOnly:true, sameSite:'lax', secure:true, path:'/' })
+
+/** Usamos un nombre único para evitar colisiones con tipos globales Session */
+export type AppSession = {
+  userId: string
+  wallet?: string
+  world?: string
 }
-export function getSession(): Session | null {
-  try{
-    const v = cookies().get(SID)?.value
-    if (!v) return null
-    const d = jwt.verify(v, secret()) as Session
-    if ((d.exp*1000) < Date.now()) return null
-    return d
-  }catch{ return null }
+
+function decode(base64: string): AppSession | null {
+  try {
+    const obj = JSON.parse(Buffer.from(base64, 'base64').toString('utf8'))
+    if (obj && typeof obj.userId === 'string') {
+      return {
+        userId: obj.userId,
+        wallet: typeof obj.wallet === 'string' ? obj.wallet : undefined,
+        world: typeof obj.world === 'string' ? obj.world : undefined,
+      }
+    }
+    return null
+  } catch {
+    return null
+  }
 }
-export function requireSession(){
+
+export function getSession(): AppSession | null {
+  try {
+    const raw = cookies().get('sess')?.value
+    if (!raw) return null
+    return decode(raw)
+  } catch {
+    return null
+  }
+}
+
+export async function requireSession(): Promise<AppSession> {
   const s = getSession()
-  if (!s) throw new Error('Not authenticated')
+  if (!s) {
+    // importante: tiramos error para cortar el request con 401 en los handlers
+    throw new Error('UNAUTH')
+  }
   return s
 }
