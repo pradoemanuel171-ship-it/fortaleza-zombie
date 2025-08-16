@@ -1,91 +1,120 @@
+// prisma/schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
-  directUrl  = env("DIRECT_DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
-enum SeasonStatus { active finished }
-enum CombatResult { win lose }
-enum PaymentKind { BASE_PURCHASE STORE_PACK STORE_BOOST PAYOUT }
-enum PaymentStatus { PENDING CONFIRMED FAILED }
+// ===== Enums =====
+enum SeasonStatus {
+  active
+  finished
+}
+
+enum CombatResult {
+  win
+  lose
+}
+
+enum PaymentKind {
+  BASE_PURCHASE
+  STORE_PACK
+  STORE_BOOST
+  PAYOUT
+}
+
+enum PaymentStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+}
+
+// ===== Models =====
+model User {
+  id                 String        @id @default(uuid())
+  walletAddress      String        @unique
+  worldUsername      String?
+  worldIdNullifier   String?       @unique
+  locale             String?
+  createdAt          DateTime      @default(now())
+
+  states             EconomyState[]
+  payments           Payment[]
+  combatsAsAttacker  CombatLog[]   @relation("attacker")
+  combatsAsDefender  CombatLog[]   @relation("defender")
+
+  // venganza
+  revengeSlots       RevengeSlot[]
+  revengeAsTarget    RevengeSlot[] @relation("revengeTarget")
+}
 
 model Season {
-  id           String          @id @default(uuid())
+  id           String         @id @default(uuid())
   ordinal      Int
   startsAt     DateTime
   endsAt       DateTime
-  status       SeasonStatus    @default(active)
-  createdAt    DateTime        @default(now())
+  status       SeasonStatus   @default(active)
+  createdAt    DateTime       @default(now())
+
   states       EconomyState[]
   combats      CombatLog[]
   payments     Payment[]
   revengeSlots RevengeSlot[]
 }
 
-model User {
-  id                 String         @id @default(uuid())
-  walletAddress      String         @unique
-  worldUsername      String?
-  worldIdNullifier   String?        @unique
-  locale             String?
-  createdAt          DateTime       @default(now())
-  states             EconomyState[]
-  payments           Payment[]
-  combatsAsAttacker  CombatLog[]    @relation("attacker")
-  combatsAsDefender  CombatLog[]    @relation("defender")
-  revengeSlots       RevengeSlot[]
-}
-
 model EconomyState {
-  userId           String
-  seasonId         String
-  user             User    @relation(fields: [userId], references: [id])
-  season           Season  @relation(fields: [seasonId], references: [id])
+  id              String    @id @default(uuid())
+  userId          String
+  seasonId        String
+  user            User      @relation(fields: [userId], references: [id])
+  season          Season    @relation(fields: [seasonId], references: [id])
 
-  basePurchased    Boolean   @default(false)
-  baseStartedAt    DateTime?
-  lastCollectedAt  DateTime?
-  obrixTotal       Int       @default(0)
-  obrixAccruedToday Int      @default(0)
-  attackStep       Int       @default(0)
-  lastAttackAt     DateTime?
-  shieldUntil      DateTime?
+  basePurchased   Boolean   @default(false)
+  baseStartedAt   DateTime?
+  lastCollectedAt DateTime?
 
-  @@id([userId, seasonId])
+  obrixTotal      Int       @default(0)
+  obrixDaily      Int       @default(0)
+
+  lastAttackAt    DateTime?
+  shieldUntil     DateTime?
+  attackStep      Int       @default(0)
+
+  @@unique([userId, seasonId], name: "userId_seasonId")
 }
 
 model CombatLog {
-  id            String       @id @default(uuid())
-  seasonId      String
-  attackerId    String
-  defenderId    String?
-  opponentKind  String
-  opponentObrix Int
-  result        CombatResult
-  loot          Int
-  createdAt     DateTime     @default(now())
+  id          String        @id @default(uuid())
+  seasonId    String
+  attackerId  String
+  defenderId  String
+  result      CombatResult
+  loot        Int
+  cost        Int
+  createdAt   DateTime      @default(now())
 
-  season        Season       @relation(fields: [seasonId], references: [id])
-  attacker      User         @relation("attacker", fields: [attackerId], references: [id])
-  defender      User?        @relation("defender", fields: [defenderId], references: [id])
+  season      Season        @relation(fields: [seasonId], references: [id])
+  attacker    User          @relation("attacker", fields: [attackerId], references: [id])
+  defender    User          @relation("defender", fields: [defenderId], references: [id])
 }
 
 model Payment {
-  id           String         @id @default(uuid())
-  userId       String
-  seasonId     String
-  user         User           @relation(fields: [userId], references: [id])
-  season       Season         @relation(fields: [seasonId], references: [id])
-  kind         PaymentKind
-  amountWld    Decimal        @db.Decimal(10, 4)
-  txHash       String         @unique
-  status       PaymentStatus  @default(PENDING)
-  createdAt    DateTime       @default(now())
-  confirmedAt  DateTime?
+  id          String        @id @default(uuid())
+  userId      String
+  seasonId    String
+  user        User          @relation(fields: [userId], references: [id])
+  season      Season        @relation(fields: [seasonId], references: [id])
+  kind        PaymentKind
+  amountWld   Decimal       @db.Decimal(18, 8)
+  txHash      String        @unique
+  status      PaymentStatus
+  createdAt   DateTime      @default(now())
+  confirmedAt DateTime?
 }
 
 model AdminSetting {
@@ -101,14 +130,13 @@ model Nonce {
 }
 
 model RevengeSlot {
-  id            String   @id @default(uuid())
-  userId        String
-  seasonId      String
-  targetAddress String
-  targetObrix   Int
-  expiresAt     DateTime
-  createdAt     DateTime @default(now())
+  id           String   @id @default(uuid())
+  userId       String
+  seasonId     String
+  targetUserId String
+  createdAt    DateTime @default(now())
 
-  user          User     @relation(fields: [userId], references: [id])
-  season        Season   @relation(fields: [seasonId], references: [id])
+  user         User     @relation(fields: [userId], references: [id])
+  season       Season   @relation(fields: [seasonId], references: [id])
+  targetUser   User     @relation("revengeTarget", fields: [targetUserId], references: [id])
 }
