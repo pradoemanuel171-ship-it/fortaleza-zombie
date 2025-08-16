@@ -1,32 +1,57 @@
-export const runtime = 'nodejs'
+// app/api/collect/route.ts
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { requireSession } from '@/lib/session'
-import { ensureState, calcPool } from '@/lib/game'
 import { getSettings } from '@/lib/settings'
-import { floorToUtcDate } from '@/lib/time'
-export async function POST(){
-  const s = requireSession()
-  const settings = await getSettings()
-  return await prisma.$transaction(async(tx)=>{
-    const { st } = await (await import('@/lib/game')).ensureState(s.uid)
-    const fresh = await tx.economyState.findUnique({ where: { userId_seasonId: { userId: st.userId, seasonId: st.seasonId } } })
-    if (!fresh) throw new Error('state missing')
-    const { pool } = calcPool(fresh, settings)
-    const today = floorToUtcDate(new Date())
-    const lastReset = fresh.dailyResetUtc ? new Date(fresh.dailyResetUtc) : today
-    const sameDay = lastReset.getTime() === today.getTime()
-    const newDaily = (sameDay ? fresh.dailyGeneratedToday : 0) + pool
-    const updated = await tx.economyState.update({
-      where: { userId_seasonId: { userId: fresh.userId, seasonId: fresh.seasonId } },
-      data: {
-        obrixTotal: fresh.obrixTotal + pool,
-        generatedLifetime: fresh.generatedLifetime + pool,
-        dailyGeneratedToday: newDaily,
-        dailyResetUtc: today,
-        lastCollectedAt: new Date()
+
+export const runtime = 'nodejs'
+
+export async function POST() {
+  try {
+    const s = await requireSession()
+    const settings = await getSettings()
+
+    return await prisma.$transaction(async (tx) => {
+      // Asegura que el estado (season + economyState) exista para el usuario
+      const game = await import('@/lib/game')
+      const { st } = await game.ensureState(s.userId)
+
+      const fresh = await tx.economyState.findUnique({
+        where: { userId_seasonId: { userId: st.userId, seasonId: st.seasonId } }
+      })
+      if (!fresh) throw new Error('state missing')
+      if (!fresh.basePurchased) {
+        return NextResponse.json({ error: 'no_base' }, { status: 400 })
       }
+
+      // Calcula cuánto se generó desde la última recolección (usa tu lógica existente)
+      const { calcPool } = game
+      const { pool } = calcPool(fresh, settings) // se asume que devuelve un entero
+
+      if (pool <= 0) {
+        return NextResponse.json({ ok: true, added: 0, obrix: fresh.obrixTotal })
+      }
+
+      const now = new Date()
+      const updated = await tx.economyState.update({
+        where: { userId_seasonId: { userId: st.userId, seasonId: st.seasonId } },
+        data: {
+          obrixTotal: fresh.obrixTotal + pool,
+          dailyGeneratedToday: (fresh.dailyGeneratedToday ?? 0) + pool,
+          lastCollectedAt: now
+        }
+      })
+
+      return NextResponse.json({
+        ok: true,
+        added: pool,
+        obrix: updated.obrixTotal
+      })
     })
-    return NextResponse.json({ ok:true, obrix: updated.obrixTotal, collected: pool })
-  })
+  } catch (err: any) {
+    if (err?.message === 'UNAUTH') {
+      return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+    }
+    return NextResponse.json({ error: 'server_error' }, { status: 500 })
+  }
 }
