@@ -21,6 +21,9 @@ model User {
   payments          Payment[]
   combatsAsAttacker CombatLog[] @relation("attacker")
   combatsAsDefender CombatLog[] @relation("defender")
+
+  // Lado opuesto de RevengeSlot.user
+  revengeSlots      RevengeSlot[] @relation("UserRevengeSlots")
 }
 
 model Season {
@@ -36,6 +39,9 @@ model Season {
   states    EconomyState[]
   payments  Payment[]
   combats   CombatLog[]
+
+  // Lado opuesto de RevengeSlot.season
+  revengeSlots RevengeSlot[] @relation("SeasonRevengeSlots")
 }
 
 model EconomyState {
@@ -146,8 +152,14 @@ model Nonce {
 
 model RevengeSlot {
   id            String   @id @default(uuid())
+
   userId        String
   seasonId      String
+
+  // Relaciones explícitas con nombres, para evitar ambigüedad
+  user          User   @relation("UserRevengeSlots",   fields: [userId],   references: [id])
+  season        Season @relation("SeasonRevengeSlots", fields: [seasonId], references: [id])
+
   slotIndex     Int
   targetUserId  String?
   targetIsBot   Boolean  @default(false)
@@ -155,9 +167,6 @@ model RevengeSlot {
   expiresAt     DateTime?
   locked        Boolean  @default(false)
   createdAt     DateTime @default(now())
-
-  user   User   @relation(fields: [userId], references: [id])
-  season Season @relation(fields: [seasonId], references: [id])
 
   @@unique([userId, seasonId, slotIndex])
 }
