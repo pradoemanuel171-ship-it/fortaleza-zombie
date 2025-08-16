@@ -1,13 +1,16 @@
-
-# Fortaleza — World App MiniApp (Secure v1)
-
-- **World App only**: bloqueo total si se abre fuera de World App.
-- **Autologin con World ID (MiniKit)**: flujo SIWE server-side.
-- **Saqueo**: bots, 3 skips, minijuego círculo 2 chances, cooldown 5min, coste 1.5% (25–250), botín 5%.
-- **Sin DB**: estado firmado en cookie.
-- **Seguridad**: JWT httpOnly de sesión, nonces, runtime Node.js en APIs.
-- **i18n ES/EN**: autodetección + switch.
-
-## Env (Vercel)
-- NEXT_PUBLIC_WLD_APP_ID=app_0b2177978f881d03251605b2f6dde563
-- APP_SECRET=F0rTaLeZa_2025_OBRIX!x7Rj9QkV2pLm
+## Setup rápido (Supabase + Vercel)
+1. Copiá de Supabase:
+   - `DATABASE_URL` (pooled/6543 + `?pgbouncer=true&connection_limit=1`)
+   - `DIRECT_DATABASE_URL` (directa/5432)
+2. En Vercel agrega:
+   - `DATABASE_URL`, `DIRECT_DATABASE_URL`, `APP_SECRET`
+   - `NEXT_PUBLIC_WLD_APP_ID`, `NEXT_PUBLIC_TREASURY_ADDRESS`
+   - `PAYMENTS_DEMO=1`
+3. Local:
+   ```bash
+   npm i
+   npx prisma generate
+   npx prisma db push
+   npm run dev
+   ```
+4. Deploy. Abrí desde World App para pasar el gate.

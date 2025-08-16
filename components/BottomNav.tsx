@@ -1,36 +1,25 @@
-
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Swords, Gift, Trophy, ShoppingBag } from 'lucide-react'
-
-const tabs = [
-  { href: '/', label: 'Base', icon: Home },
-  { href: '/raid', label: 'Saqueo', icon: Swords },
-  { href: '/events', label: 'Eventos', icon: Gift },
-  { href: '/ranking', label: 'Ranking', icon: Trophy },
-  { href: '/shop', label: 'Tienda', icon: ShoppingBag },
-]
-
-export function BottomNav() {
-  const path = usePathname()
+import { useI18n } from '@/i18n/useI18n'
+export default function BottomNav(){
+  const p = usePathname()
+  const { t } = useI18n()
+  const items = [
+    { href: '/', label: t.base, icon: '🏚️' },
+    { href: '/raid', label: t.raid, icon: '⚔️' },
+    { href: '/revenge', label: t.revenge, icon: '💢' },
+    { href: '/store', label: t.store, icon: '🛒' },
+  ]
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50">
-      <div className="mx-auto max-w-md rounded-t-2xl bg-surface/90 backdrop-blur border-t border-white/5 shadow-soft">
-        <ul className="grid grid-cols-5">
-          {tabs.map(({ href, label, icon: Icon }) => {
-            const active = path === href
-            return (
-              <li key={href} className="relative">
-                <Link href={href} className="flex flex-col items-center gap-1 py-3 text-sm transition-soft active:scale-[0.98]">
-                  <div className={active ? 'text-brand.obrix' : 'text-muted'}><Icon size={22} /></div>
-                  <span className={active ? 'text-brand.obrix' : 'text-muted'}>{label}</span>
-                </Link>
-                {active && <div className="absolute inset-x-6 -bottom-1 h-1 rounded-full bg-brand.obrix/60" />}
-              </li>
-            )
-          })}
-        </ul>
+    <nav className="fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur border-t border-white/5">
+      <div className="mx-auto max-w-md px-3 py-2 grid grid-cols-4 gap-2">
+        {items.map(it=>(
+          <Link key={it.href} href={it.href} className={"flex flex-col items-center py-1 rounded-lg transition-soft " + (p===it.href?"bg-white/5":"hover:bg-white/5")}>
+            <div className="text-lg">{it.icon}</div>
+            <div className="text-[11px] text-muted">{it.label}</div>
+          </Link>
+        ))}
       </div>
     </nav>
   )

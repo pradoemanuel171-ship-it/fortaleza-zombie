@@ -1,0 +1,21 @@
+{
+  "base": "Base",
+  "raid": "Saqueo",
+  "revenge": "Venganza",
+  "store": "Tienda",
+  "collect": "Recolectar",
+  "buy_base": "Comprar base (1 WLD)",
+  "start_generating": "Comprá tu base para empezar a generar Obrix",
+  "pool_uncollected": "Pool sin recolectar",
+  "daily_cap": "Cap diario",
+  "tap_hint": "Toca cuando el marcador pase por la zona verde",
+  "hit": "¡Acierto!",
+  "miss": "Fallaste",
+  "targets": "Objetivos",
+  "attack": "Atacar",
+  "prefer_other": "Prefiero otro",
+  "slots": "Slots",
+  "blocked_worldapp": "Abrí esta miniapp desde World App",
+  "authenticating": "Autenticando…",
+  "obrix": "Obrix"
+}

@@ -1,7 +1,9 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
+import { useI18n } from '@/i18n/useI18n'
 
 export function CirclePerfect({ onDone }: { onDone: (hit: boolean) => void }) {
+  const { t } = useI18n()
   const [attempt, setAttempt] = useState(1)
   const [angle, setAngle] = useState(0)
   const [speed, setSpeed] = useState(3.0)
@@ -52,8 +54,7 @@ export function CirclePerfect({ onDone }: { onDone: (hit: boolean) => void }) {
 
   return (
     <div className="flex flex-col items-center gap-3">
-      <div className="text-sm text-muted">Toca cuando el marcador pase por la zona verde</div>
-
+      <div className="text-sm text-muted">{t.tap_hint}</div>
       <div onClick={handleTap} className="relative w-44 h-44 rounded-full bg-black/40 flex items-center justify-center active:scale-[0.99] select-none anim-pop">
         <svg className="absolute inset-0" viewBox="0 0 120 120" shapeRendering="geometricPrecision">
           <defs>
@@ -65,15 +66,12 @@ export function CirclePerfect({ onDone }: { onDone: (hit: boolean) => void }) {
               <feDropShadow dx="0" dy="0" stdDeviation="1.6" floodColor="#22C55E" floodOpacity="0.55"/>
             </filter>
           </defs>
-
           <circle cx="60" cy="60" r={R} stroke="rgba(255,255,255,0.08)" strokeWidth="6" fill="none" vectorEffect="non-scaling-stroke"/>
-
           <g transform={`rotate(${startDeg} 60 60)`}>
             <circle cx="60" cy="60" r={R} stroke="url(#gArc)" strokeWidth="8" fill="none"
               strokeLinecap="round" strokeDasharray={dashArray} strokeDashoffset="0"
               filter="url(#softGlow)" vectorEffect="non-scaling-stroke"/>
           </g>
-
           <g transform={`rotate(${markerDeg} 60 60)`}>
             <circle cx="60" cy={60 - R} r="3" fill="#F59E0B"/>
             <rect x="59" y={60 - R} width="2" height="12" rx="1" fill="#F97316" />
@@ -85,9 +83,8 @@ export function CirclePerfect({ onDone }: { onDone: (hit: boolean) => void }) {
         </svg>
         <div className="absolute inset-0 rounded-full pointer-events-none" style={{ boxShadow:'inset 0 0 30px rgba(0,0,0,0.45)' }} />
       </div>
-
       <div className="text-xs text-muted">Intento {attempt} de 2</div>
-      <button onClick={handleTap} className="rounded-xl bg-brand.atq/20 text-brand.atq px-4 py-2 transition-soft active:scale-[0.98]">¡Golpear ahora!</button>
+      <button onClick={handleTap} className="btn" style={{background:"color-mix(in oklab, var(--atq) 18%, transparent)"}}>¡Golpear ahora!</button>
     </div>
   )
 }

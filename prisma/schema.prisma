@@ -1,0 +1,125 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql"; url = env("DATABASE_URL"); directUrl = env("DIRECT_DATABASE_URL") }
+
+model User {
+  id               String   @id @default(uuid())
+  walletAddress    String   @unique
+  worldUsername    String?
+  worldIdNullifier String?  @unique
+  locale           String?
+  createdAt        DateTime @default(now())
+  states           EconomyState[]
+  payments         Payment[]
+  combatsAsAttacker CombatLog[] @relation("attacker")
+  combatsAsDefender CombatLog[] @relation("defender")
+}
+
+model Season {
+  id        String   @id @default(uuid())
+  number    Int      @unique
+  startAt   DateTime
+  endAt     DateTime
+  status    String
+  potWld    Decimal  @default(0)
+  winners   Json?
+  createdAt DateTime @default(now())
+  states    EconomyState[]
+  payments  Payment[]
+  combats   CombatLog[]
+}
+
+model EconomyState {
+  userId   String
+  seasonId String
+  user     User   @relation(fields: [userId], references: [id])
+  season   Season @relation(fields: [seasonId], references: [id])
+
+  obrixTotal          Int      @default(0)
+  generatedLifetime   Int      @default(0)
+  purchasedLifetime   Int      @default(0)
+  dailyGeneratedToday Int      @default(0)
+  dailyResetUtc       DateTime?
+
+  basePurchased  Boolean  @default(false)
+  ratePerSec     Decimal  @default(0.008333)
+  baseStartedAt  DateTime?
+  lastCollectedAt DateTime?
+
+  attackStep          Int       @default(0)
+  lastAttackAt        DateTime?
+  attackCooldownUntil DateTime?
+  shieldUntil         DateTime?
+
+  boostMultiplier Decimal  @default(1.0)
+  boostEndsAt     DateTime?
+
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, seasonId])
+  @@index([attackCooldownUntil])
+  @@index([shieldUntil])
+}
+
+enum PaymentKind { BASE_PURCHASE, STORE_PACK, STORE_BOOST, PAYOUT }
+enum PaymentStatus { pending, confirmed, failed }
+
+model Payment {
+  id          String        @id @default(uuid())
+  userId      String
+  seasonId    String
+  user        User          @relation(fields: [userId], references: [id])
+  season      Season        @relation(fields: [seasonId], references: [id])
+  kind        PaymentKind
+  amountWld   Decimal
+  txHash      String        @unique
+  status      PaymentStatus
+  createdAt   DateTime      @default(now())
+  confirmedAt DateTime?
+}
+
+model CombatLog {
+  id          String   @id @default(uuid())
+  seasonId    String
+  season      Season   @relation(fields: [seasonId], references: [id])
+  attackerId  String
+  defenderId  String?
+  attacker    User     @relation("attacker", fields: [attackerId], references: [id])
+  defender    User?    @relation("defender", fields: [defenderId], references: [id])
+  isBot       Boolean  @default(false)
+  result      String
+  cost        Int      @default(0)
+  loot        Int      @default(0)
+  cooldownAppliedUntil DateTime?
+  shieldAppliedUntil    DateTime?
+  miniSeed    String?
+  miniTapMs   Int?
+  miniSuccess Boolean?
+  createdAt   DateTime  @default(now())
+}
+
+model AdminSetting { key String @id; value String }
+model StoreSku {
+  id String @id @default(uuid())
+  type String
+  sku String @unique
+  wldPrice Decimal
+  obrixAmount Int?
+  boostMultiplier Decimal?
+  boostHours Int?
+  active Boolean @default(true)
+  createdAt DateTime @default(now())
+}
+model Nonce { nonce String @id; purpose String; used Boolean @default(false); createdAt DateTime @default(now()) }
+model RevengeSlot {
+  id String @id @default(uuid())
+  userId String
+  seasonId String
+  slotIndex Int
+  targetUserId String?
+  targetIsBot Boolean @default(false)
+  targetObrix Int?
+  expiresAt DateTime?
+  locked Boolean @default(false)
+  createdAt DateTime @default(now())
+  @@unique([userId, seasonId, slotIndex])
+}
