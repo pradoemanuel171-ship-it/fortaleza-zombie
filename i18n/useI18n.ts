@@ -1,39 +1,32 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
-const M = {
-  es: {
-    home: 'Base',
-    raid: 'Saqueo',
-    revenge: 'Venganza',
-    store: 'Tienda',
-    createBase: 'Crear base',
-    buyBaseHint: 'Compra tu base para empezar a generar Obrix.',
-    collect: 'Recolectar',
-    generating: 'Generando...',
-    obrix: 'Obrix',
-    pool: 'Listo para recolectar'
-  },
-  en: {
-    home: 'Base',
-    raid: 'Raid',
-    revenge: 'Revenge',
-    store: 'Store',
-    createBase: 'Create base',
-    buyBaseHint: 'Buy your base to start generating Obrix.',
-    collect: 'Collect',
-    generating: 'Generating...',
-    obrix: 'Obrix',
-    pool: 'Ready to collect'
-  }
-} as const
+const ES = {
+  home_title: 'Fortaleza',
+  buy_base: 'Comprar base',
+  collect: 'Recolectar',
+  raid: 'Saqueo',
+  store: 'Tienda',
+}
+const EN = {
+  home_title: 'Fortress',
+  buy_base: 'Buy base',
+  collect: 'Collect',
+  raid: 'Raid',
+  store: 'Store',
+}
 
 export function useI18n() {
-  const [loc, setLoc] = useState<'es'|'en'>('es')
-  useEffect(() => {
-    const n = typeof navigator !== 'undefined' ? navigator.language : 'es'
-    setLoc(n.toLowerCase().startsWith('es') ? 'es' : 'en')
+  const lang = useMemo(() => {
+    if (typeof navigator !== 'undefined') {
+      return navigator.language?.toLowerCase().startsWith('es') ? 'es' : 'en'
+    }
+    return 'en'
   }, [])
-  const t = useMemo(() => M[loc], [loc])
-  return { t, loc, setLoc }
+  const dict = lang === 'es' ? ES : EN
+  function t(key: keyof typeof ES) {
+    return (dict as any)[key] ?? String(key)
+  }
+  return { t, lang }
 }
+export default useI18n

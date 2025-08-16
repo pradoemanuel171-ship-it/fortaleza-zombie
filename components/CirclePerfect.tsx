@@ -1,80 +1,88 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 type Props = {
-  zoneSizeDeg?: number
-  speedDegPerSec?: number
   onDone: (hit: boolean) => void
+  radius?: number
 }
 
-export default function CirclePerfect({ zoneSizeDeg = 60, speedDegPerSec = 180, onDone }: Props) {
-  const [angle, setAngle] = useState(0) // 0..360
+export function CirclePerfect({ onDone, radius = 48 }: Props) {
+  const [angle, setAngle] = useState(0)
+  const [start, setStart] = useState(Math.random() * 2 * Math.PI)
+  const [size, setSize] = useState(Math.PI / 6) // 30°
   const [attempt, setAttempt] = useState(1)
-  const req = useRef<number | null>(null)
-  const start = useRef<number | null>(null)
-  const zoneStart = useRef(Math.floor(Math.random() * 360))
+  const runningRef = useRef(true)
 
   useEffect(() => {
-    const step = (ts: number) => {
-      if (start.current == null) start.current = ts
-      const dt = (ts - start.current) / 1000 // sec
-      const deg = (dt * speedDegPerSec) % 360
-      setAngle(deg)
-      req.current = requestAnimationFrame(step)
+    runningRef.current = true
+    let raf = 0
+    let last = performance.now()
+    const speed = 1.8 // rad/s
+    const loop = (t: number) => {
+      const dt = (t - last) / 1000
+      last = t
+      setAngle(a => (a + speed * dt) % (2 * Math.PI))
+      if (runningRef.current) raf = requestAnimationFrame(loop)
     }
-    req.current = requestAnimationFrame(step)
-    return () => { if (req.current) cancelAnimationFrame(req.current) }
-  }, [speedDegPerSec])
+    raf = requestAnimationFrame(loop)
+    return () => { runningRef.current = false; cancelAnimationFrame(raf) }
+  }, [])
 
-  const onTap = () => {
+  const R = radius
+  const C = 2 * Math.PI * R
+
+  const onClick = () => {
     const a = angle
-    const s = zoneStart.current
-    const e = (s + zoneSizeDeg) % 360
+    const s = start
+    const e = (start + size) % (2 * Math.PI)
     let inZone = false
-    if (zoneSizeDeg <= 0) inZone = false
-    else if (e >= s) inZone = a >= s && a <= e
-    else inZone = a >= s || a <= e
-
+    if (size > 0) {
+      if (e >= s) inZone = a >= s && a <= e
+      else inZone = a >= s || a <= e // envuelve 2π
+    }
     if (inZone) onDone(true)
-    else if (attempt === 1) { setAttempt(2); zoneStart.current = Math.floor(Math.random()*360) }
+    else if (attempt === 1) { setAttempt(2); setStart(Math.random() * 2 * Math.PI) }
     else onDone(false)
   }
 
-  // SVG arc math
-  const R = 48
-  const C = 2 * Math.PI * R
-  const arcLen = (zoneSizeDeg / 360) * C
-  const dashArray = `${arcLen} ${C}`
-  const startDeg = zoneStart.current
-  const markerDeg = angle
-  const dashOffset = ((360 - startDeg) / 360) * C
+  const zoneDash = `${(size / (2 * Math.PI)) * C} ${C}`
+  const zoneOffset = (1 - (start / (2 * Math.PI))) * C
+  const markerDeg = (angle * 180) / Math.PI
 
   return (
-    <div className="w-full flex flex-col items-center gap-4">
-      <div className="relative" style={{ width: 140, height: 140 }}>
-        <svg viewBox="0 0 120 120" width={140} height={140}>
-          <circle cx="60" cy="60" r={R} stroke="rgba(255,255,255,0.15)" strokeWidth="12" fill="none" />
-          {/* perfect zone */}
+    <div className="w-40 h-40 mx-auto select-none" onClick={onClick}>
+      <svg viewBox="0 0 120 120" className="w-full h-full">
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <g transform="translate(60,60)">
+          <circle r={R} fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="10"/>
           <circle
-            cx="60" cy="60" r={R}
-            stroke="#22c55e" strokeWidth="12" fill="none"
-            strokeDasharray={dashArray}
-            strokeDashoffset={dashOffset}
+            r={R}
+            fill="none"
+            stroke="#22c55e"
+            strokeWidth="10"
             strokeLinecap="round"
-            style={{ transition: 'stroke-dashoffset 0.2s ease' }}
+            strokeDasharray={zoneDash}
+            strokeDashoffset={zoneOffset}
+            filter="url(#glow)"
           />
-          {/* rotating marker */}
-          <g transform={`rotate(${markerDeg} 60 60)`}>
-            <circle cx="60" cy="12" r="6" fill="#fff" />
-          </g>
-        </svg>
-        <button
-          onClick={onTap}
-          className="absolute inset-0 w-full h-full rounded-full focus:outline-none active:scale-95 transition-transform"
-          aria-label="Tap"
-        />
+          <line
+            x1="0" y1={-R - 2} x2="0" y2={-R + 10}
+            stroke="white" strokeWidth="3" transform={`rotate(${markerDeg})`}
+          />
+        </g>
+      </svg>
+      <div className="text-center mt-2 text-sm opacity-70">
+        Intento {attempt}/2 · toca cuando esté en verde
       </div>
-      <div className="text-sm text-white/80">{attempt === 1 ? 'Intento 1/2' : 'Intento 2/2'}</div>
     </div>
   )
 }
+export default CirclePerfect
