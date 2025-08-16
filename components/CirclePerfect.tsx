@@ -8,7 +8,7 @@ type Props = {
   zoneSizeDeg?: number
 }
 
-export default function CirclePerfect({
+function CirclePerfectImpl({
   onDone,
   durationMs = 2500,
   zoneSizeDeg = 60,
@@ -99,3 +99,7 @@ export default function CirclePerfect({
     </div>
   )
 }
+
+// Export default y named para cubrir ambos estilos de import
+export default CirclePerfectImpl
+export { CirclePerfectImpl as CirclePerfect }
