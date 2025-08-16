@@ -1,0 +1,15 @@
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#0f1220;color:#e8eefb;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+#game{position:fixed;inset:0;display:block;width:100%;height:100%;background:linear-gradient(180deg,#233,#1a1f2b)}
+#hud{position:fixed;left:0;right:0;top:0;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+#stats{background:rgba(0,0,0,.35);backdrop-filter:blur(4px);padding:6px 10px;border-radius:12px;font-weight:600;letter-spacing:.2px;pointer-events:auto}
+#pauseBtn{pointer-events:auto;border:none;border-radius:12px;padding:8px 10px;background:#1e293b;color:#dbeafe;box-shadow:0 2px 12px rgba(0,0,0,.3);font-size:16px}
+#controls{position:fixed;inset:0;pointer-events:none}
+#stick{position:absolute;left:18px;bottom:18px;width:140px;height:140px;border-radius:999px;background:rgba(15,20,35,.35);border:1px solid rgba(255,255,255,.12);pointer-events:auto;touch-action:none}
+#knob{position:absolute;left:50%;top:50%;width:64px;height:64px;border-radius:999px;transform:translate(-50%,-50%);background:rgba(230,240,255,.55);border:2px solid rgba(255,255,255,.5)}
+#attackBtn{position:absolute;right:18px;bottom:28px;width:96px;height:96px;border-radius:999px;border:none;background:#f59e0b;color:#1b1f2a;font-weight:900;font-size:32px;box-shadow:0 8px 22px rgba(0,0,0,.35);pointer-events:auto;touch-action:none}
+#overlay{position:fixed;inset:0;display:grid;place-items:center;background:rgba(4,6,12,.7);opacity:0;visibility:hidden;transition:.25s}
+#overlay.show{opacity:1;visibility:visible}
+#overlay .panel{background:#0b1020;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px;max-width:520px;color:#e6edf6;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+#overlay h1{margin:0 0 8px;font-size:28px}
+#overlay button,#startBtn{border:none;background:#22c55e;color:#07110a;font-size:18px;font-weight:800;padding:12px 18px;border-radius:12px;cursor:pointer}
