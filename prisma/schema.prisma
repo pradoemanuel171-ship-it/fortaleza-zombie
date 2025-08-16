@@ -1,0 +1,114 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+
+enum SeasonStatus { ACTIVE FINISHED }
+enum CombatResult { WIN LOSE }
+enum PaymentKind { BASE_PURCHASE STORE_PACK STORE_BOOST PAYOUT }
+enum PaymentStatus { PENDING CONFIRMED FAILED }
+
+model Season {
+  id           String       @id @default(uuid())
+  ordinal      Int
+  startsAt     DateTime
+  endsAt       DateTime
+  status       SeasonStatus @default(ACTIVE)
+  createdAt    DateTime     @default(now())
+  states       EconomyState[]
+  combats      CombatLog[]
+  payments     Payment[]
+  revengeSlots RevengeSlot[]
+}
+
+model User {
+  id               String   @id @default(uuid())
+  walletAddress    String?  @unique
+  worldUsername    String?
+  worldIdNullifier String?  @unique
+  locale           String?
+  createdAt        DateTime @default(now())
+  states           EconomyState[]
+  payments         Payment[]
+  attacks          CombatLog[] @relation("attacker")
+  defenses         CombatLog[] @relation("defender")
+  revengeSlots     RevengeSlot[]
+}
+
+model EconomyState {
+  userId          String
+  seasonId        String
+  user            User    @relation(fields: [userId], references: [id])
+  season          Season  @relation(fields: [seasonId], references: [id])
+  obrixTotal      Int     @default(0)
+  basePurchased   Boolean @default(false)
+  baseStartedAt   DateTime?
+  lastCollectedAt DateTime?
+  lastAttackAt    DateTime?
+  shieldUntil     DateTime?
+  canAttackAt     DateTime?
+  attackStep      Int      @default(0)
+
+  @@id([userId, seasonId])
+}
+
+model CombatLog {
+  id         String       @id @default(uuid())
+  seasonId   String
+  attackerId String
+  defenderId String
+  result     CombatResult
+  loot       Int          @default(0)
+  cost       Int          @default(0)
+  createdAt  DateTime     @default(now())
+
+  season   Season @relation(fields: [seasonId], references: [id])
+  attacker User   @relation("attacker", fields: [attackerId], references: [id])
+  defender User   @relation("defender", fields: [defenderId], references: [id])
+}
+
+model Payment {
+  id          String        @id @default(uuid())
+  userId      String
+  seasonId    String
+  kind        PaymentKind
+  amountWld   Decimal
+  txHash      String?       @unique
+  status      PaymentStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+  confirmedAt DateTime?
+
+  user   User   @relation(fields: [userId], references: [id])
+  season Season @relation(fields: [seasonId], references: [id])
+}
+
+model AdminSetting {
+  key   String @id
+  value String
+}
+
+model StoreSku {
+  id        String   @id @default(uuid())
+  sku       String   @unique
+  title     String
+  priceWld  Decimal
+  obrix     Int
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Nonce {
+  nonce     String   @id
+  purpose   String
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model RevengeSlot {
+  id           String   @id @default(uuid())
+  seasonId     String
+  userId       String
+  targetUserId String
+  createdAt    DateTime @default(now())
+
+  season Season @relation(fields: [seasonId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+}
