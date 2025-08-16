@@ -50,28 +50,33 @@ model EconomyState {
   dailyGeneratedToday  Int      @default(0)
   dailyResetUtc        DateTime?
 
-  basePurchased   Boolean  @default(false)
-  ratePerSec      Decimal  @default(0.008333) // 30/hora
-  baseStartedAt   DateTime?
-  lastCollectedAt DateTime?
+  basePurchased        Boolean  @default(false)
+  ratePerSec           Decimal  @default(0.008333) // 30/hora
+  baseStartedAt        DateTime?
+  lastCollectedAt      DateTime?
 
   attackStep           Int       @default(0)
   lastAttackAt         DateTime?
   attackCooldownUntil  DateTime?
   shieldUntil          DateTime?
 
-  boostMultiplier Decimal  @default(1.0)
-  boostEndsAt     DateTime?
+  boostMultiplier      Decimal  @default(1.0)
+  boostEndsAt          DateTime?
 
-  updatedAt DateTime @updatedAt
+  updatedAt            DateTime @updatedAt
 
   @@id([userId, seasonId])
   @@index([attackCooldownUntil])
   @@index([shieldUntil])
 }
 
-enum PaymentKind   { BASE_PURCHASE STORE_PACK STORE_BOOST PAYOUT }
-// Después (OK)
+enum PaymentKind {
+  BASE_PURCHASE
+  STORE_PACK
+  STORE_BOOST
+  PAYOUT
+}
+
 enum PaymentStatus {
   PENDING
   CONFIRMED
@@ -121,14 +126,14 @@ model AdminSetting {
 }
 
 model StoreSku {
-  id              String  @id @default(uuid())
+  id              String   @id @default(uuid())
   type            String
-  sku             String  @unique
+  sku             String   @unique
   wldPrice        Decimal
   obrixAmount     Int?
   boostMultiplier Decimal?
   boostHours      Int?
-  active          Boolean @default(true)
+  active          Boolean  @default(true)
   createdAt       DateTime @default(now())
 }
 
