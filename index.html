@@ -3,26 +3,29 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
-  <title>Fortaleza Zombie — Pixel v3</title>
+  <title>Fortaleza Zombie — Neo v4</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <canvas id="game"></canvas>
 
   <div id="hud">
-    <div id="stats">
+    <div class="left">
       <span class="chip">❤️ <span id="hp">100</span></span>
-      <span class="chip">🛡️ <span id="basehp">100</span></span>
-      <span class="chip">☠️ <span id="kills">0</span></span>
-      <span class="chip">⏱️ <span id="time">0</span>s</span>
+      <span class="chip">🛡️ <span id="basehp">120</span></span>
+    </div>
+    <div class="center">
+      <div id="bar">
+        <span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
     </div>
     <div class="right">
-      <button id="themeBtn" title="Cambiar tema">🎨</button>
-      <button id="pauseBtn" title="Pausar">⏸</button>
+      <span class="chip">☠️ <span id="kills">0</span></span>
+      <span class="chip">⏱️ <span id="time">0</span>s</span>
+      <button id="pauseBtn">⏸</button>
     </div>
   </div>
 
-  <!-- Dual Sticks -->
   <div id="controls">
     <div id="stickMove" class="stick"><div class="knob"></div></div>
     <div id="stickAim" class="stick"><div class="knob"></div></div>
@@ -32,10 +35,8 @@
   <div id="overlay" class="show">
     <div class="panel">
       <h1>Fortaleza Zombie</h1>
-      <p>Pixel art 2D. Mueve con el stick izquierdo, apunta con el derecho (auto-fuego). WASD/Space + mouse en PC.</p>
-      <div class="row">
-        <button id="startBtn">Jugar</button>
-      </div>
+      <p>Estética pixel 2D. Izq: mover · Der: apuntar (auto-fuego). WASD/mouse en PC.</p>
+      <button id="startBtn">Jugar</button>
     </div>
   </div>
 
