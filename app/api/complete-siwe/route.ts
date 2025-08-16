@@ -1,41 +1,61 @@
+// app/api/complete-siwe/route.ts
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
-import { verifySiweMessage } from 'siwe'
-import { prisma } from '@/lib/db'
-import { setSession } from '@/lib/session'
+import { SiweMessage } from 'siwe'
+import prisma from '@/lib/db'
+import { saveSession } from '@/lib/session'
 
-type WalletAuthPayload = {
-  message: string
-  signature: string
-  address?: string
-}
+export const runtime = 'nodejs'
 
 export async function POST(req: Request) {
   try {
-    const body = (await req.json()) as { payload: WalletAuthPayload }
-    const nonce = cookies().get('siwe_nonce')?.value
-    if (!nonce) return NextResponse.json({ error: 'missing_nonce' }, { status: 400 })
+    const { message, signature, nonce } = await req.json()
+    if (!message || !signature || !nonce) {
+      return NextResponse.json({ error: 'bad_request' }, { status: 400 })
+    }
 
-    const { message, signature } = body?.payload || ({} as WalletAuthPayload)
-    if (!message || !signature) return NextResponse.json({ error: 'bad_payload' }, { status: 400 })
+    // Validar nonce (anti-replay)
+    const n = await prisma.nonce.findUnique({ where: { nonce } })
+    if (!n || n.used) {
+      return NextResponse.json({ error: 'invalid_nonce' }, { status: 400 })
+    }
 
-    const result = await verifySiweMessage({ message, signature, nonce })
-    if (!result.success) return NextResponse.json({ error: 'siwe_verify_failed' }, { status: 401 })
+    // Verificar SIWE
+    const msg = new SiweMessage(message)
+    const host = new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000').host
 
-    const address = result.data.address
-    if (!address) return NextResponse.json({ error: 'no_address' }, { status: 400 })
-
-    const user = await prisma.user.upsert({
-      where: { walletAddress: address },
-      update: {},
-      create: { walletAddress: address }
+    const result = await msg.verify({
+      signature,
+      domain: host,
+      nonce
     })
 
-    const res = NextResponse.json({ ok: true, userId: user.id, address })
-    setSession(res, { uid: user.id, address })
-    res.cookies.delete('siwe_nonce')
-    return res
+    if (!result.success) {
+      return NextResponse.json({ error: 'siwe_verify_failed' }, { status: 401 })
+    }
+
+    // Marcar nonce como usado
+    await prisma.nonce.update({
+      where: { nonce },
+      data: { used: true }
+    })
+
+    // Crear/obtener usuario por wallet
+    const wallet = msg.address.toLowerCase()
+    const user = await prisma.user.upsert({
+      where: { walletAddress: wallet },
+      update: {},
+      create: { walletAddress: wallet }
+    })
+
+    // Guardar sesión (ajustá según tu helper)
+    await saveSession({
+      uid: user.id,
+      wallet: user.walletAddress
+    })
+
+    return NextResponse.json({ ok: true })
   } catch (e) {
+    console.error('complete-siwe error', e)
     return NextResponse.json({ error: 'server_error' }, { status: 500 })
   }
 }
