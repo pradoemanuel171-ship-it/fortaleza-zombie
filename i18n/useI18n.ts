@@ -1,29 +1,27 @@
-'use client'
-import { useEffect, useState } from 'react'
+'use client';
 
-const dicts: Record<string, Record<string,string>> = {
+const M = {
   es: {
-    welcome: 'Bienvenido a Fortaleza',
-    create_base: 'Crear base (1 WLD)',
-    buy_base_hint: 'Necesitas comprar la base para empezar a generar Orbix.',
-    collect: 'Recolectar',
-    attack: 'Atacar',
+    openInWorld: 'Abre esta miniapp dentro de World App para jugar.',
+    verifyTitle: 'Autentícate con World ID',
+    verifyBtn: 'Verificar con World ID',
+    verified: '¡Autenticado!',
+    goRaid: 'Ir a Asalto',
+    buildBase: 'Construir Base',
+    youAreIn: 'Estás dentro. ¡A jugar!',
   },
   en: {
-    welcome: 'Welcome to Fortaleza',
-    create_base: 'Create base (1 WLD)',
-    buy_base_hint: 'You must buy a base to start generating Orbix.',
-    collect: 'Collect',
-    attack: 'Raid',
+    openInWorld: 'Open this miniapp inside World App to play.',
+    verifyTitle: 'Sign in with World ID',
+    verifyBtn: 'Verify with World ID',
+    verified: 'Authenticated!',
+    goRaid: 'Go to Raid',
+    buildBase: 'Build Base',
+    youAreIn: 'You are in. Let’s play!',
   }
-}
+} as const;
 
 export function useI18n(){
-  const [loc, setLoc] = useState<'en'|'es'>('es')
-  useEffect(()=>{
-    const l = navigator.language?.startsWith('es') ? 'es' : 'en'
-    setLoc(l as any)
-  },[])
-  const t = (k:string)=> dicts[loc]?.[k] ?? k
-  return { t, loc }
+  const lang = (typeof navigator !== 'undefined' && navigator.language?.startsWith('es')) ? 'es' : 'en';
+  return M[lang as 'es'|'en'];
 }

@@ -1,70 +1,52 @@
-'use client'
-import React, { useEffect, useState, useRef } from 'react'
-import dynamic from 'next/dynamic'
+'use client';
 
-const IDKitWidget = dynamic(async () => (await import('@worldcoin/idkit')).IDKitWidget, { ssr: false })
+import { IDKitWidget, VerificationLevel } from '@worldcoin/idkit';
+import { useState } from 'react';
 
-function isWorldAppUA(){
-  if (typeof navigator==='undefined') return false
-  const ua = navigator.userAgent || ''
-  return /WorldApp|World\b/i.test(ua)
-}
+export default function WorldIdGate(){
+  const [busy, setBusy] = useState(false);
+  const appId = process.env.NEXT_PUBLIC_WORLD_ID_APP_ID as string;
+  const action = process.env.NEXT_PUBLIC_WORLD_ID_ACTION || 'login-fortaleza';
 
-export default function WorldIdGate({ children }:{ children: React.ReactNode }){
-  const [authed, setAuthed] = useState<boolean>(false)
-  const [needWorld, setNeedWorld] = useState<boolean>(false)
-  const [open, setOpen] = useState<boolean>(false)
-  const [config, setConfig] = useState<{appId:string, action:string}|null>(null)
-
-  useEffect(()=>{
-    // fetch session
-    fetch('/api/session').then(r=>r.json()).then(s=>{
-      if (s?.ok && s.auth==='ok') { setAuthed(true); return }
-      if (!isWorldAppUA()) { setNeedWorld(true); return }
-      setNeedWorld(false)
-      setOpen(true)
-    }).catch(()=>{})
-  }, [])
-
-  useEffect(()=>{
-    fetch('/api/worldid/config').then(r=>r.json()).then((d)=>{
-      if (d?.appId && d?.action) setConfig({appId:d.appId, action:d.action})
-    }).catch(()=>{})
-  }, [])
-
-  if (authed) return <>{children}</>
-
-  if (needWorld){
-    return (
-      <div style={{padding:'24px'}}>
-        <h2>🔒 Solo en World App</h2>
-        <p>Abre esta miniapp dentro de <strong>World App</strong> para continuar.</p>
-      </div>
-    )
+  async function onSuccess(payload: any){
+    // Send to server to set httpOnly cookie
+    setBusy(true);
+    try{
+      const r = await fetch('/api/worldid/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        credentials: 'include'
+      });
+      if(r.ok){
+        location.reload();
+      }else{
+        const j = await r.json().catch(()=>({}));
+        alert(j?.error || 'No se pudo verificar.');
+      }
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
-    <div style={{padding:'24px'}}>
-      <h2>Verifica con World ID</h2>
-      {config && (
+    <div className="card anim" style={{textAlign:'center'}}>
+      <h3>Autentícate con World ID</h3>
+      <p className="hint">Requerido para jugar.</p>
+      <div style={{display:'flex',justifyContent:'center',marginTop:8}}>
         <IDKitWidget
-          app_id={config.appId}
-          action={config.action}
-          autoClose
-          onSuccess={async (res:any)=>{
-            const r = await fetch('/api/worldid/verify', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(res) })
-            const j = await r.json().catch(()=>({}))
-            if (j?.ok){ setAuthed(true); setOpen(false) }
-          }}
+          app_id={appId}
+          action={action}
+          onSuccess={onSuccess}
+          verification_level={VerificationLevel.Device}
         >
           {({ open }) => (
-            <button onClick={()=>open()} style={{padding:'10px 16px', borderRadius:8, border:'1px solid #333', background:'#2d2d2d', color:'#fff'}}>
-              Continuar
+            <button className="btn" onClick={open} disabled={busy}>
+              {busy ? 'Verificando…' : 'Verificar con World ID'}
             </button>
           )}
         </IDKitWidget>
-      )}
-      {!config && <p>Configuración de World ID faltante.</p>}
+      </div>
     </div>
-  )
+  );
 }

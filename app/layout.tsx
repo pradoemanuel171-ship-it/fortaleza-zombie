@@ -1,24 +1,25 @@
-export const metadata = {
-  title: 'Fortaleza',
-  description: 'Mini App - World ID gated',
-}
+import './globals.css';
+import type { Metadata } from 'next';
+import { BottomNav } from '@/components/BottomNav';
 
-export default function RootLayout({ children }: { children: React.ReactNode }){
+export const metadata: Metadata = {
+  title: 'Fortaleza: World App Demo',
+  description: 'Miniapp gated by World ID – demo skeleton without DB.'
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
-      <body style={{minHeight:'100dvh', background:'#0a0a0a', color:'#eaeaea', fontFamily:'system-ui, -apple-system, Segoe UI, Roboto, sans-serif'}}>
-        <div style={{maxWidth: 520, margin: '0 auto', minHeight:'100dvh', display:'flex', flexDirection:'column'}}>
-          <header style={{padding:'16px 12px', borderBottom:'1px solid #222'}}>
+      <body>
+        <div className="container">
+          <header className="header">
             <strong>🧟 Fortaleza</strong>
+            <span className="hint">Demo</span>
           </header>
-          <main style={{flex:1, padding:'12px'}}>{children}</main>
-          <nav style={{display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:6, padding:12, borderTop:'1px solid #222'}}>
-            <a href="/" style={{textDecoration:'none', color:'#eaeaea', textAlign:'center'}}>🏠 Home</a>
-            <a href="/raid" style={{textDecoration:'none', color:'#eaeaea', textAlign:'center'}}>⚔️ Asalto</a>
-            <a href="/gate" style={{textDecoration:'none', color:'#eaeaea', textAlign:'center'}}>🔒 Gate</a>
-          </nav>
+          <main className="bottom-pad" style={{ flex: 1 }}>{children}</main>
+          <div className="nav"><BottomNav/></div>
         </div>
       </body>
     </html>
-  )
+  );
 }
