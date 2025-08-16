@@ -3,37 +3,39 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
-  <title>Fortaleza Zombie — MVP WebView</title>
+  <title>Fortaleza Zombie — Pixel v3</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <canvas id="game"></canvas>
 
-  <!-- HUD -->
   <div id="hud">
     <div id="stats">
-      ❤️ <span id="hp">100</span>
-      &nbsp;|&nbsp; 🛡️ Base: <span id="basehp">100</span>
-      &nbsp;|&nbsp; ☠️ Kills: <span id="kills">0</span>
-      &nbsp;|&nbsp; ⏱️ <span id="time">0</span>s
+      <span class="chip">❤️ <span id="hp">100</span></span>
+      <span class="chip">🛡️ <span id="basehp">100</span></span>
+      <span class="chip">☠️ <span id="kills">0</span></span>
+      <span class="chip">⏱️ <span id="time">0</span>s</span>
     </div>
-    <button id="pauseBtn" aria-label="Pausar">⏸</button>
+    <div class="right">
+      <button id="themeBtn" title="Cambiar tema">🎨</button>
+      <button id="pauseBtn" title="Pausar">⏸</button>
+    </div>
   </div>
 
-  <!-- Touch Controls -->
+  <!-- Dual Sticks -->
   <div id="controls">
-    <div id="stick" aria-label="Movimiento">
-      <div id="knob"></div>
-    </div>
-    <button id="attackBtn" aria-label="Atacar">⚔️</button>
+    <div id="stickMove" class="stick"><div class="knob"></div></div>
+    <div id="stickAim" class="stick"><div class="knob"></div></div>
+    <button id="attackBtn" class="big">⚔️</button>
   </div>
 
-  <!-- Overlay (Start/Game Over) -->
   <div id="overlay" class="show">
     <div class="panel">
       <h1>Fortaleza Zombie</h1>
-      <p>Sobrevive y protege tu base. Mueve con el stick y ataca con ⚔️. (WASD/Space en PC)</p>
-      <button id="startBtn">Jugar</button>
+      <p>Pixel art 2D. Mueve con el stick izquierdo, apunta con el derecho (auto-fuego). WASD/Space + mouse en PC.</p>
+      <div class="row">
+        <button id="startBtn">Jugar</button>
+      </div>
     </div>
   </div>
 
