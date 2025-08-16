@@ -1,26 +1,42 @@
-export const runtime = 'nodejs'
+// app/api/buy-base/route.ts
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { requireSession } from '@/lib/session'
-import { getSettings, parseNumber } from '@/lib/settings'
 import { getCurrentSeason } from '@/lib/season'
-export async function POST(req: Request){
-  const s = requireSession()
-  const season = await getCurrentSeason()
-  const settings = await getSettings()
-  const price = parseNumber(settings.base_price_wld)
-  const demo = process.env.PAYMENTS_DEMO === '1'
-  if (!demo){
-    const body = await req.json().catch(()=>null) as any
-    if (!body?.txHash) return NextResponse.json({ error:'txHash required' }, { status:400 })
-  }
-  await prisma.$transaction(async(tx)=>{
-    await tx.economyState.upsert({
-      where: { userId_seasonId: { userId: s.uid, seasonId: season.id } },
-      update: { basePurchased: true, baseStartedAt: new Date(), lastCollectedAt: new Date() },
-      create: { userId: s.uid, seasonId: season.id, basePurchased: true, baseStartedAt: new Date(), lastCollectedAt: new Date() }
+
+export const runtime = 'nodejs'
+
+export async function POST() {
+  try {
+    const s = await requireSession()
+    const season = await getCurrentSeason()
+    const now = new Date()
+
+    await prisma.$transaction(async (tx) => {
+      await tx.economyState.upsert({
+        where: {
+          userId_seasonId: { userId: s.userId, seasonId: season.id },
+        },
+        update: {
+          basePurchased: true,
+          baseStartedAt: now,
+          lastCollectedAt: now,
+        },
+        create: {
+          userId: s.userId,
+          seasonId: season.id,
+          basePurchased: true,
+          baseStartedAt: now,
+          lastCollectedAt: now,
+        },
+      })
     })
-    await tx.season.update({ where: { id: season.id }, data: { potWld: { increment: price } } })
-  })
-  return NextResponse.json({ ok:true })
+
+    return NextResponse.json({ ok: true })
+  } catch (err: any) {
+    if (err?.message === 'UNAUTH') {
+      return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+    }
+    return NextResponse.json({ error: 'server_error' }, { status: 500 })
+  }
 }

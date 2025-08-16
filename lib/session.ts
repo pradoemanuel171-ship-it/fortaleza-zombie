@@ -1,11 +1,15 @@
 // lib/session.ts
 import { cookies } from 'next/headers'
 
-/** Usamos un nombre único para evitar colisiones con tipos globales Session */
+/** Usamos un nombre único para evitar colisiones con tipos globales `Session` */
 export type AppSession = {
   userId: string
   wallet?: string
   world?: string
+}
+
+function encode(sess: AppSession): string {
+  return Buffer.from(JSON.stringify(sess)).toString('base64')
 }
 
 function decode(base64: string): AppSession | null {
@@ -36,9 +40,18 @@ export function getSession(): AppSession | null {
 
 export async function requireSession(): Promise<AppSession> {
   const s = getSession()
-  if (!s) {
-    // importante: tiramos error para cortar el request con 401 en los handlers
-    throw new Error('UNAUTH')
-  }
+  if (!s) throw new Error('UNAUTH')
   return s
+}
+
+/** Setea la cookie de sesión httpOnly (se usa en /api/siwe) */
+export function setSession(sess: AppSession) {
+  const val = encode(sess)
+  cookies().set('sess', val, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30, // 30 días
+  })
 }
